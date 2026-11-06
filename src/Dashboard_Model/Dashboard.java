@@ -12,6 +12,10 @@ public class Dashboard {
         this.widgets = new ArrayList<>(); // se inicializa la lista de widgets
     }
 
+    public List<Widget> getWidgets() {
+    return widgets;
+}
+
     public void addWidget(Widget widget) {
         if (widget != null) //verificación no nulo
             this.widgets.add(widget);
@@ -22,7 +26,7 @@ public class Dashboard {
     
     }
 
-    //Overloading en búsqueda de widgets
+    //Overloading en búsqueda de widgets por ID y abajo por nombre
     public Widget getWidget(int ID) {
         for (Widget w: widgets) {
             if(ID == w.getID()) {
@@ -55,14 +59,13 @@ public class Dashboard {
         return activos;
     }
 
+    // Refresca solo los widgets actualizables que estén encendidos
     public void refreshWidgets() {
         for (Widget w: widgets) {
-            if(w instanceof Actualizable act) {
-                act.refresh();
-            }
             if(w.isState() && w instanceof Actualizable act) {
                 act.refresh();
             }
+        
 
         }
     }

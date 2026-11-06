@@ -1,6 +1,9 @@
 package Dashboard_Model;
 
-public class RelojWidget extends Widget implements Actualizable, Renderable{
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+public class RelojWidget extends Widget implements Actualizable{
     private String localTime;
 
     public RelojWidget(String name, int ID, float memCapacity, boolean isState, int height, int width, String localTime) {
@@ -8,9 +11,20 @@ public class RelojWidget extends Widget implements Actualizable, Renderable{
         this.localTime = localTime;
     }
 
+    //getter específico
+    public String getLocalTime() {
+        return localTime;
+    }
+
     @Override
     public String render() {
-        return 
+        return " | " + getName() + " | Hora actual en Ciudad de Guatemala: " + localTime;
+    }
+
+    @Override 
+    public void refresh() {
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
+        this.localTime = LocalTime.now().format(formato);
     }
 
 

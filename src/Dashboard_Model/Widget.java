@@ -28,12 +28,12 @@ public abstract class Widget implements Comparable<Widget>, Renderable{
     
 
     //método para interfaz comparable que compara widgets por capacidad de memoria
-    @Override
+    
     public int compareTo(Widget other) {
         return Float.compare(this.memCapacity, other.memCapacity);
 }
 
-    @Override
+    
     public boolean equals(Object o) {
         if (this == o) {return true;} //verificación de si apuntan al mismo espacio de memoria
         if (o == null || !(o instanceof Widget)) {return false;} // verificación que el objeto no sea nulo y que sí sea widget
@@ -43,7 +43,11 @@ public abstract class Widget implements Comparable<Widget>, Renderable{
         return this.ID == other.ID;
 
     }
-    @Override
+
+    @Override 
+    public abstract String render(); //solo se establece base y se le delegan los detalles específicos a clases hijas
+    
+    @Override 
     public String toString() {
         return "\n=============================================================================================\n" 
         + "ID: " + ID + "| Name: " + name +"\n"
