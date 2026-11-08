@@ -26,17 +26,17 @@ public abstract class Widget implements Comparable<Widget>, Renderable{
     public int getHeight() { return height; }
     public int getWidth() { return width; }
     
-
+    @Override 
     //método para interfaz comparable que compara widgets por capacidad de memoria
-    
     public int compareTo(Widget other) {
         return Float.compare(this.memCapacity, other.memCapacity);
 }
 
-    
+    @Override
     public boolean equals(Object o) {
         if (this == o) {return true;} //verificación de si apuntan al mismo espacio de memoria
         if (o == null || !(o instanceof Widget)) {return false;} // verificación que el objeto no sea nulo y que sí sea widget
+                            //único instaceof autorizado por el profesor por estar dentro de equals
 
         Widget other = (Widget) o; //casteo del objeto a Widget
 
@@ -46,6 +46,25 @@ public abstract class Widget implements Comparable<Widget>, Renderable{
 
     @Override 
     public abstract String render(); //solo se establece base y se le delegan los detalles específicos a clases hijas
+
+
+    public void refresh() {
+    }
+
+    // Comportamiento base: no procesa acciones por defecto
+    public void executeAction(String accion) {
+    
+    }
+
+    // Informa a la vista si este widget debe renderizar controles de acción
+    public boolean tieneAcciones() {
+        return false;
+    }
+
+    // Devuelve las etiquetas de los botones de acción autónomos del widget
+    public String[] getAccionesDisponibles() {
+        return new String[0];
+    }
     
     @Override 
     public String toString() {

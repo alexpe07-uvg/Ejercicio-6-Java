@@ -2,6 +2,7 @@ package Dashboard_Model;
 public class CronometroWidget extends Widget implements Interactuable, Actualizable {
     private int seconds;
     private boolean running;
+    private long lastStartTime = 0;
 
     public CronometroWidget(String name, int ID, float memCapacity, boolean isState, int height, int width) {
         super(name, ID, memCapacity, isState, height, width);
@@ -25,6 +26,9 @@ public class CronometroWidget extends Widget implements Interactuable, Actualiza
 
     @Override
     public String render() {
+        if (running) {
+            this.seconds = (int) ((System.currentTimeMillis() - this.lastStartTime) / 1000L);
+        }
         int minutes = seconds / 60;
         int remainingSeconds = seconds % 60;
         String tiempoFormateado = String.format("%02d:%02d", minutes, remainingSeconds); // se le da formato de 2 dígitos a los minutos y segundos tal y como en cronometro real
@@ -34,20 +38,32 @@ public class CronometroWidget extends Widget implements Interactuable, Actualiza
 
     @Override 
     public void refresh() {
-        if (running) { // para que el tiempo avance si el cornometro ya se inició
-            seconds++;
+        if (running) {
+            this.seconds = (int) ((System.currentTimeMillis() - this.lastStartTime) / 1000L);
         }
-
     }
+
+    @Override
+    public boolean tieneAcciones() {
+        return true;
+    }
+    
     @Override
     public void executeAction(String action) {
         if ("iniciar".equalsIgnoreCase(action)) {
-            this.running = true;
+            if (!this.running) {
+                this.running = true;
+                this.lastStartTime = System.currentTimeMillis() - (this.seconds * 1000L);
+            }
         } else if ("detener".equalsIgnoreCase(action) || "pausar".equalsIgnoreCase(action)) {
-            this.running = false;
+            if (this.running) {
+                this.running = false;
+                this.seconds = (int) ((System.currentTimeMillis() - this.lastStartTime) / 1000L);
+            }
         } else if ("reiniciar".equalsIgnoreCase(action)) {
             this.seconds = 0;
             this.running = false;
+            this.lastStartTime = 0;
         }
     }
     

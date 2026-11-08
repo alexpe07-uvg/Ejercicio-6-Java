@@ -2,7 +2,7 @@ package Dashboard_Model;
 public class MonBateriaWidget extends Widget implements Actualizable {
     private int percentageLevel; //nivel de batería en porcentaje
     
-    public MonBateriaWidget(int ID, String name, float memCapacity, boolean isState, int height, int width, int percentageLevel) {
+    public MonBateriaWidget(String name, int ID,  float memCapacity, boolean isState, int height, int width, int percentageLevel) {
         super(name, ID, memCapacity, isState, height, width);
         
         //verificación de niveles superiores de los límites para que no exista un nivel de batería mayor a 100% o menor a 0%
@@ -32,10 +32,9 @@ public class MonBateriaWidget extends Widget implements Actualizable {
 
     @Override
     public void refresh() {
-        //Simulacion de descarga de 1% cada vez que se refresque
+        // Se descarga 1% cada vez que se pulsa "Refrescar Actualizables"
         if (percentageLevel > 0) {
             percentageLevel--;
         }
     }
-    
 }

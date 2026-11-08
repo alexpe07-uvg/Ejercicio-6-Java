@@ -31,6 +31,11 @@ public class CounterVasosWidget extends Widget implements Interactuable {
         return " | " + getName() + " | Vasos tomados: " + drunkenVasos + " | Meta de vasos: " + goalVasos;
     }
 
+    @Override
+    public boolean tieneAcciones() {
+        return true;
+    }
+    
     @Override 
     public void executeAction(String action) {
         if ("incrementar".equalsIgnoreCase(action)) { // Acción para incrementar vasos tomados

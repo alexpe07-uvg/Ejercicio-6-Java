@@ -1,16 +1,33 @@
-package Dashboard_Model;
+package Dashboard_Model; //cambio de lógica para correcto funcionamiento de simulación de música
+
 public class MusicaWidget extends Widget implements Interactuable {
+
     private String actualSong;
     private boolean isPlaying;
+
+    // Lista de canciones para la simulación
+    private String[] playlist = {
+        "Ojitos Lindos - Bad Bunny",
+        "La Gozadera - Gente de Zona",
+        "Yandel 150 - Yandel & Feid"
+    };
+    private int indicePista = 0;
 
     public MusicaWidget(String name, int ID, float memCapacity, boolean isState, int height, int width, String actualSong, boolean isPlaying) {
         super(name, ID, memCapacity, isState, height, width);
         this.actualSong = actualSong;
         this.isPlaying = isPlaying;
+
+        // Si la canción inicial coincide con alguna de la lista, sincroniza el índice
+        for (int i = 0; i < playlist.length; i++) {
+            if (playlist[i].equalsIgnoreCase(actualSong)) {
+                this.indicePista = i;
+                break;
+            }
+        }
     }
 
-
-    //getters y setters (interactivo) específicos
+    // Getters y Setters
     public String getActualSong() {
         return actualSong;
     }
@@ -27,33 +44,42 @@ public class MusicaWidget extends Widget implements Interactuable {
         this.isPlaying = isPlaying;
     }
 
-    @Override 
+    @Override
+    public boolean tieneAcciones() {
+        return true;
+    }
+
+    @Override
     public String render() {
-        // forma resumida de un if-else
-        String estado = isPlaying ? "▶ Reproduciendo" : "⏸ Pausado"; // si se está reproducioendo es verdadero, arroja el mensaje correspondiente; sino arroja pausado
+        String estado = isPlaying ? "▶ Reproduciendo" : "⏸ Pausado";
         return "[" + getName() + "] " + estado + ": " + actualSong;
     }
 
-    //lista con nombres de canciones para hacer la simulacion más realista
-    private int indicePista = 0;
-    private String[] playlist = {"Ojitos Lindos", "La Gozadera", "Yandel 150"};
-
-    @Override 
+    @Override
     public void executeAction(String action) {
-        if ("toggle".equalsIgnoreCase(action)) {
-            this.isPlaying = !this.isPlaying; // Cambia el estado de reproducción
-        } else if ("cambiar".equalsIgnoreCase(action)) {
-            indicePista++;
+        if (action == null) return;
+        String cmd = action.trim().toLowerCase();
 
-            if (indicePista >= playlist.length) {
-                indicePista = 0; // Reinicia la lista si se llega al final
-            }
-            this.actualSong = playlist[indicePista]; // Cambia a la siguiente canción
+        switch (cmd) {
+            case "siguiente":
+                // Avanza al siguiente índice de la lista y reinicia a 0 si llega al final
+                indicePista = (indicePista + 1) % playlist.length;
+                this.actualSong = playlist[indicePista];
+                this.isPlaying = true;
+                break;
 
+            case "play":
+                this.isPlaying = true;
+                break;
+
+            case "pausar":
+            case "pausa":
+                this.isPlaying = false;
+                break;
+
+            default:
+                // Si el comando no es ninguno de los tres, no altera el estado
+                break;
+        }
     }
-
 }
-
-}
-    
-

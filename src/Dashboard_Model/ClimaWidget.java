@@ -1,5 +1,6 @@
 package Dashboard_Model;
-public class ClimaWidget extends Widget implements Actualizable {
+
+public class ClimaWidget extends Widget implements Actualizable, Interactuable {
     private float temperature;
     private String weatherCondition;
 
@@ -28,14 +29,54 @@ public class ClimaWidget extends Widget implements Actualizable {
 
     @Override
     public String render() {
-        return " | " + getName() + " | Temperatura: " + temperature + "°C | Condición climática: " + weatherCondition;
+        String icono = "⛅";
+        String condMin = weatherCondition.toLowerCase();
+        if (condMin.contains("sol") || condMin.contains("despejado")) {
+            icono = "☀️";
+        } else if (condMin.contains("lluv")) {
+            icono = "🌧️";
+        } else if (condMin.contains("nub")) {
+            icono = "☁️";
+        }
+
+        return "<b>Temperatura:</b> <span style='font-size:15px; font-weight:bold; color:#f0883e;'>" 
+                + icono + " " + temperature + "°C</span><br>"
+                + "<b>Condición:</b> <span style='color:#e6edf3;'>" + weatherCondition + "</span>";
     }
 
-    //condición de clima fija para simplificar la simulación, pero se puede mejorar para que cambie dependiendo de la temperatura
     @Override 
     public void refresh() {
-        // Simulación: pequeña variación térmica
-        this.temperature = Math.round((20.0f + (float)(Math.random() * 5.0)) * 10.0f) / 10.0f;
+        // Se ejecuta cuando se presiona el botón "Refrescar Actualizables"
+        simularCambioClima();
     }
-    
+
+    // Lógica para variar la temperatura y la condición climática
+    private void simularCambioClima() {
+        this.temperature = Math.round((18.0f + (float)(Math.random() * 8.0)) * 10.0f) / 10.0f;
+        if (this.temperature >= 24.0f) {
+            this.weatherCondition = "Soleado";
+        } else if (this.temperature >= 21.0f) {
+            this.weatherCondition = "Parcialmente nublado";
+        } else if (this.temperature >= 19.0f) {
+            this.weatherCondition = "Mayormente nublado";
+        } else {
+            this.weatherCondition = "Lluvia ligera";
+        }
+    }
+
+    @Override
+    public boolean tieneAcciones() {
+        return true;
+    }
+
+    @Override
+    public String[] getAccionesDisponibles() {
+        return new String[]{"Actualizar Clima"};
+    }
+
+    @Override
+    public void executeAction(String action) {
+        // Se ejecuta con su propio botón autónomo
+        simularCambioClima();
+    }
 }

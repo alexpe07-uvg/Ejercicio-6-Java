@@ -1,8 +1,6 @@
 package Dashboard_View;
 
 import Dashboard_Model.Widget;
-import Dashboard_Model.Interactable;
-import Dashboard_Model.Actualizable;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,7 +10,14 @@ import java.util.List;
 
 public class DashboardFrame extends JFrame {
 
-    // Componentes del panel superior (Búsqueda y Filtros)
+    // Paleta de colores para modo oscuro marcado / profundo (Dark Slate / OLED)
+    private static final Color BG_OSCURO = new Color(13, 14, 18);
+    private static final Color BG_PANEL = new Color(20, 22, 29);
+    private static final Color BG_TARJETA = new Color(25, 28, 38);
+    private static final Color BORDE_TARJETA = new Color(42, 47, 63);
+    private static final Color COLOR_INACTIVO = new Color(139, 148, 158);
+
+    // Componentes del panel superior (Búsqueda y Filtro para orden de memoria)
     private JTextField txtBusqueda;
     private JButton btnBuscar;
     private JButton btnLimpiar;
@@ -27,6 +32,11 @@ public class DashboardFrame extends JFrame {
     private JButton btnRefrescarTodo;
     private JLabel lblResumen;
 
+    // Caché de componentes visuales para actualización suave sin parpadeos ni pérdida de scroll
+    private final java.util.Map<Integer, JLabel> mapLabelsRender = new java.util.HashMap<>();
+    private final java.util.Map<Integer, JLabel> mapLabelsMeta = new java.util.HashMap<>();
+    private List<Integer> ultimosIds = new java.util.ArrayList<>();
+
     public DashboardFrame() {
         super("Dashboard de Control de Widgets");
         initUI();
@@ -37,66 +47,104 @@ public class DashboardFrame extends JFrame {
         setSize(1000, 700);
         setMinimumSize(new Dimension(800, 500));
         setLocationRelativeTo(null);
+        getContentPane().setBackground(BG_OSCURO);
         setLayout(new BorderLayout(10, 10));
 
-        // 1. Panel Superior (Norte) - Búsqueda y Filtros
-        JPanel panelNorte = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 10));
-        panelNorte.setBorder(new EmptyBorder(5, 10, 5, 10));
+        // 1. Panel Superior - Búsqueda y Filtros
+        JPanel panelSup = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 10));
+        panelSup.setBackground(BG_PANEL);
+        panelSup.setBorder(new EmptyBorder(8, 12, 8, 12));
 
-        panelNorte.add(new JLabel("Buscar (ID / Nombre):"));
+        panelSup.add(new JLabel("Buscar widget (ID / Nombre):"));
         txtBusqueda = new JTextField(12);
-        panelNorte.add(txtBusqueda);
+        panelSup.add(txtBusqueda);
 
         btnBuscar = new JButton("Buscar");
-        panelNorte.add(btnBuscar);
+        panelSup.add(btnBuscar);
 
         btnLimpiar = new JButton("Limpiar");
-        panelNorte.add(btnLimpiar);
+        panelSup.add(btnLimpiar);
 
-        panelNorte.add(new JSeparator(SwingConstants.VERTICAL));
+        panelSup.add(new JSeparator(SwingConstants.VERTICAL));
 
-        panelNorte.add(new JLabel("Mostrar:"));
+        panelSup.add(new JLabel("Mostrar:"));
         cmbFiltro = new JComboBox<>(new String[]{"Todos", "Solo Activos"});
-        panelNorte.add(cmbFiltro);
+        panelSup.add(cmbFiltro);
 
-        btnOrdenarMemoria = new JButton("Ordenar por RAM");
-        panelNorte.add(btnOrdenarMemoria);
+        btnOrdenarMemoria = new JButton("Ordenar por Memoria Consumida");
+        panelSup.add(btnOrdenarMemoria);
 
-        add(panelNorte, BorderLayout.NORTH);
+        add(panelSup, BorderLayout.NORTH);
 
         // 2. Panel Central (Centro) - Cuadrícula dinámica de Widgets con Scroll
         panelWidgets = new JPanel();
+        panelWidgets.setBackground(BG_OSCURO);
         // GridLayout de 0 filas y 2 columnas (se adapta hacia abajo según la cantidad)
         panelWidgets.setLayout(new GridLayout(0, 2, 12, 12));
-        panelWidgets.setBorder(new EmptyBorder(10, 15, 10, 15));
+        panelWidgets.setBorder(new EmptyBorder(12, 16, 12, 16));
 
         scrollPane = new JScrollPane(panelWidgets);
+        scrollPane.setBackground(BG_OSCURO);
+        scrollPane.getViewport().setBackground(BG_OSCURO);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getVerticalScrollBar().setUnitIncrement(16); // Scroll suave
         add(scrollPane, BorderLayout.CENTER);
 
-        // 3. Panel Inferior (Sur) - Acciones y Métricas
-        JPanel panelSur = new JPanel(new BorderLayout(10, 10));
-        panelSur.setBorder(new EmptyBorder(10, 15, 10, 15));
+        // 3. Panel Inferior - Acciones y Métricas
+        JPanel panelInf = new JPanel(new BorderLayout(10, 10));
+        panelInf.setBackground(BG_PANEL);
+        panelInf.setBorder(new EmptyBorder(10, 15, 10, 15));
 
         btnRefrescarTodo = new JButton("Refrescar Actualizables");
-        panelSur.add(btnRefrescarTodo, BorderLayout.WEST);
+        panelInf.add(btnRefrescarTodo, BorderLayout.WEST);
 
-        lblResumen = new JLabel("Cargando métricas del sistema...");
+        lblResumen = new JLabel("Cargando especificaciones del sistema...");
         lblResumen.setHorizontalAlignment(SwingConstants.RIGHT);
-        panelSur.add(lblResumen, BorderLayout.EAST);
+        panelInf.add(lblResumen, BorderLayout.EAST);
 
-        add(panelSur, BorderLayout.SOUTH);
+        add(panelInf, BorderLayout.SOUTH);
     }
 
-    // --- MÉTODOS PÚBLICOS PARA EL CONTROLADOR ---
+    // MÉTODOS PÚBLICOS PARA EL CONTROLADOR
 
     // Dibuja la lista de widgets recibida desde el modelo
     public void renderizarWidgets(List<Widget> widgets, ActionListener accionWidgetListener) {
+        if (widgets == null) {
+            widgets = java.util.Collections.emptyList();
+        }
+
+        List<Integer> idsActuales = new java.util.ArrayList<>();
+        for (Widget w : widgets) {
+            idsActuales.add(w.getID());
+        }
+
+        // Si los widgets en pantalla son los mismos, solo actualizamos los textos 
+        if (idsActuales.equals(ultimosIds) && !mapLabelsRender.isEmpty()) {
+            for (Widget w : widgets) {
+                JLabel lblRender = mapLabelsRender.get(w.getID());
+                JLabel lblMeta = mapLabelsMeta.get(w.getID());
+                if (lblRender != null) {
+                    lblRender.setText("<html>" + w.render() + "</html>");
+                }
+                if (lblMeta != null) {
+                    String estadoTexto = w.isState() ? "● ACTIVO" : "○ INACTIVO";
+                    String colorEstado = w.isState() ? "#3fb950" : "#8b949e";
+                    lblMeta.setText("<html>" + w.getMemCapacity() + " KB | <span style='color:" 
+                            + colorEstado + "; font-weight:bold;'>" + estadoTexto + "</span></html>");
+                }
+            }
+            return;
+        }
+
+        // Si cambió la lista mostrada (por búsqueda, filtro u ordenamiento), reconstruimos la cuadrícula
+        ultimosIds = idsActuales;
+        mapLabelsRender.clear();
+        mapLabelsMeta.clear();
         panelWidgets.removeAll();
 
-        if (widgets == null || widgets.isEmpty()) {
+        if (widgets.isEmpty()) {
             JLabel lblVacio = new JLabel("No se encontraron widgets para mostrar.", SwingConstants.CENTER);
+            lblVacio.setForeground(COLOR_INACTIVO);
             panelWidgets.setLayout(new BorderLayout());
             panelWidgets.add(lblVacio, BorderLayout.CENTER);
         } else {
@@ -112,19 +160,24 @@ public class DashboardFrame extends JFrame {
 
     // Estructura visual de cada tarjeta individual
     private JPanel crearTarjetaWidget(Widget w, ActionListener accionWidgetListener) {
-        JPanel tarjeta = new JPanel(new BorderLayout(8, 8));
+        JPanel tarjeta = new JPanel(new BorderLayout(10, 10));
+        tarjeta.setBackground(BG_TARJETA);
         tarjeta.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor"), 1),
-                new EmptyBorder(10, 12, 10, 12)
+                BorderFactory.createLineBorder(BORDE_TARJETA, 1, true),
+                new EmptyBorder(12, 14, 12, 14)
         ));
 
-        // Encabezado de la tarjeta (Nombre, ID, RAM y Estado)
+        // Encabezado de la tarjeta (Nombre, ID, Memoria y Estado)
         JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
         String estadoTexto = w.isState() ? "● ACTIVO" : "○ INACTIVO";
+        String colorEstado = w.isState() ? "#3fb950" : "#8b949e";
+
         JLabel lblTitulo = new JLabel(w.getName() + " (ID: " + w.getID() + ")");
         lblTitulo.setFont(lblTitulo.getFont().deriveFont(Font.BOLD, 13f));
 
-        JLabel lblMeta = new JLabel(w.getMemCapacity() + " KB | " + estadoTexto);
+        JLabel lblMeta = new JLabel("<html>" + w.getMemCapacity() + " KB | <span style='color:" 
+                + colorEstado + "; font-weight:bold;'>" + estadoTexto + "</span></html>");
         lblMeta.setFont(lblMeta.getFont().deriveFont(Font.PLAIN, 11f));
 
         header.add(lblTitulo, BorderLayout.WEST);
@@ -135,14 +188,32 @@ public class DashboardFrame extends JFrame {
         JLabel lblRender = new JLabel("<html>" + w.render() + "</html>");
         tarjeta.add(lblRender, BorderLayout.CENTER);
 
-        // Pie de tarjeta: Botón de acción si implementa Interactable
-        if (w instanceof Interactuable) {
-            JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-            JButton btnAccion = new JButton("Interactuar");
-            // Se le asigna el ID en el ActionCommand para que el Controller sepa a cuál pertenece
-            btnAccion.setActionCommand("INTERACTUAR_" + w.getID());
-            btnAccion.addActionListener(accionWidgetListener);
-            footer.add(btnAccion);
+        // Guardar referencias para actualización fluida sin reconstrucción
+        mapLabelsRender.put(w.getID(), lblRender);
+        mapLabelsMeta.put(w.getID(), lblMeta);
+
+        // Pie de tarjeta: Botones autónomos polimórficos según el widget
+        if (w.tieneAcciones()) {
+            JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
+            footer.setOpaque(false);
+
+            String[] acciones = w.getAccionesDisponibles();
+            if (acciones != null && acciones.length > 0) {
+                for (String accion : acciones) {
+                    JButton btnAccion = new JButton(accion);
+                    btnAccion.setActionCommand("ACCION:" + w.getID() + ":" + accion);
+                    btnAccion.addActionListener(accionWidgetListener);
+                    btnAccion.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    footer.add(btnAccion);
+                }
+            } else {
+                JButton btnAccion = new JButton("Interactuar");
+                btnAccion.setActionCommand("INTERACTUAR_" + w.getID());
+                btnAccion.addActionListener(accionWidgetListener);
+                btnAccion.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                footer.add(btnAccion);
+            }
+
             tarjeta.add(footer, BorderLayout.SOUTH);
         }
 
@@ -188,4 +259,5 @@ public class DashboardFrame extends JFrame {
     public void setRefrescarTodoListener(ActionListener listener) {
         btnRefrescarTodo.addActionListener(listener);
     }
+
 }

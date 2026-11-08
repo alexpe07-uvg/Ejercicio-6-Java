@@ -61,12 +61,10 @@ public class Dashboard {
 
     // Refresca solo los widgets actualizables que estén encendidos
     public void refreshWidgets() {
-        for (Widget w: widgets) {
-            if(w.isState() && w instanceof Actualizable act) {
-                act.refresh();
+        for (Widget w : widgets) {
+            if (w.isState()) {
+                w.refresh(); // Polimorfismo puro
             }
-        
-
         }
     }
 }

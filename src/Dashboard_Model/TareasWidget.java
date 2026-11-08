@@ -1,34 +1,62 @@
 package Dashboard_Model;
-public class TareasWidget extends Widget implements Interactuable{
-    private int pendingTasks;
 
-    public TareasWidget(String name, int ID, float memCapacity, boolean isState, int height, int width, int tareasPendientes) {
-        super(name, ID, memCapacity, isState, height, width);
-        this.pendingTasks = Math.max(0, pendingTasks); // Asegura que el número de tareas pendientes no sea negativo
+import java.util.ArrayList;
+import java.util.List;
+
+public class TareasWidget extends Widget implements Interactuable {
+
+    private List<String> listaTareas;
+
+    public TareasWidget(String name, int ID, float memCapacity, boolean state, int height, int width) {
+        super(name, ID, memCapacity, state, height, width);
+        this.listaTareas = new ArrayList<>();
+        
+        // Tareas precargadas de ejemplo
+        this.listaTareas.add("Revisar modelo MVC");
+        this.listaTareas.add("Subir cambios a Git");
     }
 
-    //getters y setters (interactivo) específicos
-    public int getPendingTasks() {
-        return pendingTasks;
+    @Override
+    public boolean tieneAcciones() {
+        return true;
     }
 
-    public void setPendingTasks(int pendingTasks) {
-        this.pendingTasks = Math.max(0, pendingTasks); // Asegura que el número de tareas pendientes no sea negativo
-    }
+    @Override
+    public void executeAction(String accion) {
+        if (accion == null) return;
+        String cmd = accion.trim().toLowerCase();
 
-    @Override 
-    public String render() {
-        return " | " + getName() + " | Tareas pendientes: " + pendingTasks;
-    }
-
-    @Override 
-    public void executeAction(String action) {
-        if ("completar".equalsIgnoreCase(action)) { // Acción para completar una tarea
-            if (this.pendingTasks > 0) {
-                this.pendingTasks--; //reduce
+        if (cmd.startsWith("agregar")) {
+            // Si escribe "agregar Estudiar cálculo" o solo "agregar"
+            String nuevaTarea = accion.replaceFirst("(?i)agregar", "").trim();
+            if (nuevaTarea.isEmpty()) {
+                nuevaTarea = "Tarea pendiente #" + (listaTareas.size() + 1);
             }
-        } else if ("agregar".equalsIgnoreCase(action)) {
-            this.pendingTasks++; //aumenta
+            listaTareas.add(nuevaTarea);
+
+        } else if (cmd.equals("completar") || cmd.equals("eliminar")) {
+            // Remueve la primera tarea completada
+            if (!listaTareas.isEmpty()) {
+                listaTareas.remove(0);
+            }
         }
+    }
+
+    @Override
+    public String render() {
+        StringBuilder html = new StringBuilder();
+        html.append("<b>Pendientes (").append(listaTareas.size()).append("):</b><br>");
+
+        if (listaTareas.isEmpty()) {
+            html.append("<span style='color: gray;'>¡Al día! No hay pendientes.</span>");
+        } else {
+            html.append("<ul style='margin-left: 15px; margin-top: 2px;'>");
+            for (String t : listaTareas) {
+                html.append("<li>").append(t).append("</li>");
+            }
+            html.append("</ul>");
+        }
+
+        return html.toString();
     }
 }

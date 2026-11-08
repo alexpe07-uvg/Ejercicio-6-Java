@@ -23,6 +23,11 @@ public class NotasWidget extends Widget implements Interactuable{
     }
 
     @Override
+    public boolean tieneAcciones() {
+        return true;
+    }
+
+    @Override
     public void executeAction(String action) {
         if ("limpiar".equalsIgnoreCase(action)) { // Acción para limpiar la nota
             this.textNota = "(Vacía)";
