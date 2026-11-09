@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 
-//contenedor de 10 widgets predeterminados
 public class Dashboard {
     private List<Widget> widgets;
 

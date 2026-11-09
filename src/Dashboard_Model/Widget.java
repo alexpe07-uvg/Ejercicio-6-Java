@@ -65,6 +65,11 @@ public abstract class Widget implements Comparable<Widget>, Renderable{
     public String[] getAccionesDisponibles() {
         return new String[0];
     }
+
+    //método base para obtener instrucciones de interacción dependiendo del widget a utilizar
+    public String getInstrucciones() {
+    return "Ingresa el comando o dato requerido:";
+}
     
     @Override 
     public String toString() {

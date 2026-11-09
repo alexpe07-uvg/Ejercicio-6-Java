@@ -7,13 +7,18 @@ public class NotasWidget extends Widget implements Interactuable{
         this.textNota = textNota;
     }
 
-    //getters y setters (interactivo) específicos
+    //getters y setters específicos
     public String getTextNota() {
         return textNota;
     }
 
     public void setTextNota(String textNota) {
         this.textNota = textNota;
+    }
+
+    @Override
+    public String getInstrucciones() {
+        return "Escribe el texto de la nueva nota a guardar:";
     }
 
     @Override

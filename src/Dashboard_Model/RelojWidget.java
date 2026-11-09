@@ -25,16 +25,9 @@ public class RelojWidget extends Widget implements Actualizable{
 
     @Override 
     public void refresh() {
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("HH:mm:ss"); //formato de hora
         this.localTime = LocalTime.now().format(formato);
     }
-
-
-    
-
-
-
-
 
     @Override
 public String toString() {

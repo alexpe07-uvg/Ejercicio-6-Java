@@ -50,6 +50,11 @@ public class MusicaWidget extends Widget implements Interactuable {
     }
 
     @Override
+    public String getInstrucciones() {
+        return "Comandos disponibles:\n • play\n • pausar\n • siguiente";
+    }
+
+    @Override
     public String render() {
         String estado = isPlaying ? "▶ Reproduciendo" : "⏸ Pausado";
         return "[" + getName() + "] " + estado + ": " + actualSong;

@@ -1,5 +1,5 @@
 package Dashboard_Model;
-public class NotAlertaWidget extends Widget {
+public class NotAlertaWidget extends Widget { // también es un widget fijo que solo se dibuja y no tiene interacciones en este caso
     private String alertMessage;
     private String level;
 

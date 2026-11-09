@@ -39,7 +39,7 @@ public class ClimaWidget extends Widget implements Actualizable, Interactuable {
             icono = "☁️";
         }
 
-        return "<b>Temperatura:</b> <span style='font-size:15px; font-weight:bold; color:#f0883e;'>" 
+        return "<b>Temperatura:</b> <span style='font-size:15px; font-weight:bold; color:#f0883e;'>"  // Forma para devolver temperatura y condición climpática con icono y color para mejor estética
                 + icono + " " + temperature + "°C</span><br>"
                 + "<b>Condición:</b> <span style='color:#e6edf3;'>" + weatherCondition + "</span>";
     }

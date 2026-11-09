@@ -43,12 +43,17 @@ public class TareasWidget extends Widget implements Interactuable {
     }
 
     @Override
+    public String getInstrucciones() {
+        return "Comandos disponibles:\n • agregar [nombre tarea]\n • completar (elimina la primera)";
+    }
+
+    @Override
     public String render() {
         StringBuilder html = new StringBuilder();
         html.append("<b>Pendientes (").append(listaTareas.size()).append("):</b><br>");
 
         if (listaTareas.isEmpty()) {
-            html.append("<span style='color: gray;'>¡Al día! No hay pendientes.</span>");
+            html.append("<span style='color: gray;'>¡Al día! No hay pendientes.</span>"); //uso de está sintáxis para tener mejor estética y crear una lista más realista de tareas
         } else {
             html.append("<ul style='margin-left: 15px; margin-top: 2px;'>");
             for (String t : listaTareas) {

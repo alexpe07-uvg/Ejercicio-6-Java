@@ -188,23 +188,18 @@ public class DashBoardController {
     }
 
     private void solicitarAccionUsuario(Widget widget) {
-        String accion = JOptionPane.showInputDialog(view,
-                "Widget: " + widget.getName() + "\n"
-                + "Acciones según el widget:\n"
-                + " Cronómetro: iniciar / detener / reiniciar\n"
-                + " Tareas: completar (se elimina primera de la lista) / agregar + nombre tarea\n"
-                + " Vasos: incrementar / reiniciar\n"
-                + " Música: play / pausar / siguiente\n"
-                + " Notas: escribe el texto directo para guardar\n\n"
-                + "Ingresa la acción o comando:",
-                "Interactuar con " + widget.getName(),
-                JOptionPane.QUESTION_MESSAGE);
+    String accion = JOptionPane.showInputDialog(view,
+            "Widget: " + widget.getName() + "\n\n"
+            + widget.getInstrucciones() + "\n\n"
+            + "Ingresa la acción:",
+            "Interactuar con " + widget.getName(),
+            JOptionPane.QUESTION_MESSAGE);
 
-        if (accion != null && !accion.trim().isEmpty()) {
-            widget.executeAction(accion.trim()); 
-            actualizarVista(listaActual);
-        }
+    if (accion != null && !accion.trim().isEmpty()) {
+        widget.executeAction(accion.trim());
+        actualizarVista(listaActual);
     }
+}
 
     // Conexión final con la vista
     private void actualizarVista(List<Widget> listaAMostrar) {

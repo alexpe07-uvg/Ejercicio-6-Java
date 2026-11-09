@@ -25,6 +25,11 @@ public class CronometroWidget extends Widget implements Interactuable, Actualiza
     }
 
     @Override
+    public String getInstrucciones() {
+        return "Comandos disponibles:\n • iniciar\n • detener\n • reiniciar";
+    }
+
+    @Override
     public String render() {
         if (running) {
             this.seconds = (int) ((System.currentTimeMillis() - this.lastStartTime) / 1000L);

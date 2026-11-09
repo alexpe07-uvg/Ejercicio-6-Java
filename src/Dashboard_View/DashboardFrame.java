@@ -136,7 +136,7 @@ public class DashboardFrame extends JFrame {
             return;
         }
 
-        // Si cambió la lista mostrada (por búsqueda, filtro u ordenamiento), reconstruimos la cuadrícula
+        // Si cambió la lista mostrada (por búsqueda, filtro u ordenamiento), se reconstruye la cuadrícula
         ultimosIds = idsActuales;
         mapLabelsRender.clear();
         mapLabelsMeta.clear();

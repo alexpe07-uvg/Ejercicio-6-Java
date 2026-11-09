@@ -27,6 +27,11 @@ public class CounterVasosWidget extends Widget implements Interactuable {
     }
 
     @Override
+    public String getInstrucciones() {
+        return "Comandos disponibles:\n • incrementar\n • reiniciar";
+    }
+
+    @Override
     public String render() {
         return " | " + getName() + " | Vasos tomados: " + drunkenVasos + " | Meta de vasos: " + goalVasos;
     }
@@ -42,7 +47,7 @@ public class CounterVasosWidget extends Widget implements Interactuable {
             if(this.drunkenVasos < this.goalVasos) {
                 this.drunkenVasos++;
             }
-        } else if ("reiniciar".equalsIgnoreCase(action)) { // Acción para decrementar vasos tomados
+        } else if ("reiniciar".equalsIgnoreCase(action)) { // Acción para resetear conteo de vasos tomados
             this.drunkenVasos = 0;
         }
     }
